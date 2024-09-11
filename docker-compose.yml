@@ -1,0 +1,55 @@
+version: "3.0"
+
+networks:
+  dev-net:
+    # 网络
+    driver: bridge # 桥接模式
+    external: true
+
+services:
+  mysql:
+    platform: linux/amd64
+    container_name: mysql
+    hostname: mysql
+    image: mysql:8.0
+    command:
+      [
+        "--default-time-zone=+08:00",
+        "--sql_mode=",
+        "--max_allowed_packet=64M",
+        "--default-authentication-plugin=mysql_native_password",
+      ]
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+      - TZ=Asia/Taipei
+    working_dir: /app/
+    volumes:
+      - db-future-mysql:/var/lib/mysql
+      - ./database/mysql/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./:/app/
+    ports:
+      - "33060:3306"
+    networks:
+      - dev-net
+
+  phpmyadminmysql:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=root
+      - PMA_PASSWORD=123456
+      - TZ=Asia/Taipei
+    ports:
+      - 8080:80
+    links:
+      - mysql
+    volumes:
+      - db-mysqlphpadmin:/sessions
+      - ./database/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php
+      - ./database/phpmyadmin/customer.ini:/usr/local/etc/php/conf.d/customer.ini
+    networks:
+      - dev-net
+volumes:
+    db-future-mysql:
+    db-mysqlphpadmin:

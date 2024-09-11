@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package example;
+
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+import "protoc-gen-validate/validate/validate.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "demo/proto/example";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  base_path: "/example"
+  responses: {
+    key: "500"
+    value: {
+      description: "Internal Server Error."
+      schema: {
+        json_schema: {
+          ref: ".google.rpc.Status"
+        }
+      }
+    }
+  }
+  responses: {
+    key: "400"
+    value: {
+      description: "Bad Request."
+      schema: {
+        json_schema: {
+          ref: ".google.rpc.Status"
+        }
+      }
+    }
+  }
+};
+
+service Example {
+  rpc Login(LoginReq) returns (LoginResp) {
+    option (google.api.http) = {
+      post: "/v1/login"
+      body: "*"
+    };
+  }
+  rpc ListItems(ListItemsReq) returns (ListItemsResp) {
+    option (google.api.http) = {
+      get: "/v1/item"
+      response_body: "*"
+    };
+  }
+}
+
+message LoginReq {
+  string Username = 1 [json_name="Username",(validate.rules).string.min_len = 1];
+  string Password = 2 [json_name="Password",(validate.rules).string.min_len = 1];
+}
+
+message LoginResp {
+  string status = 1;
+  string description = 2;
+}
+
+message ListItemsReq {
+  string username = 1 [(validate.rules).string.min_len = 1];
+  string item = 2 [(validate.rules).string.min_len = 1];
+}
+
+message ListItemsResp {
+  string status = 1;
+  repeated ItemData  item = 2;
+}
+
+message ItemData {
+  int64 itemId = 1 [json_name="itemid"];
+  string itemName = 2 [json_name="item_name"];
+  string category = 3;
+}

@@ -1,0 +1,3 @@
+// Package logger implements structured, leveled logging in Go, and integrates wtih
+// 3rd-party packages used in our total solutions including Airbrake, GORM, ...
+package logger
